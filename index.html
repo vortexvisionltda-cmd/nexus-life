@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Gestão Pessoal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#020617;
+  --primary:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --green:#22c55e;
+  --red:#ef4444;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system;
+  background:var(--bg);
+  color:var(--text);
+  padding:16px;
+}
+
+h1{margin-bottom:16px}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+}
+
+.tabs button{
+  flex:1;
+  padding:10px;
+  background:var(--card);
+  color:var(--muted);
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.tabs button.active{
+  background:var(--primary);
+  color:#fff;
+}
+
+.section{display:none}
+.section.active{display:block}
+
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+}
+
+input,select,button{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  margin-bottom:8px;
+  background:#020617;
+  color:var(--text);
+}
+
+button.primary{
+  background:var(--primary);
+  cursor:pointer;
+}
+
+.list-item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+
+.income{color:var(--green)}
+.expense{color:var(--red)}
+
+label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Gestão Pessoal</h1>
+
+<div class="tabs">
+  <button class="active" onclick="switchTab('finance')">Financeiro</button>
+  <button onclick="switchTab('habits')">Hábitos</button>
+  <button onclick="switchTab('goals')">Metas</button>
+</div>
+
+<!-- FINANCEIRO -->
+<div id="finance" class="section active">
+
+  <div class="card">
+    <h3>Saldo</h3>
+    <h2 id="balance">R$ 0,00</h2>
+  </div>
+
+  <div class="card">
+    <h3>Novo lançamento</h3>
+    <input id="amount" type="number" placeholder="Valor">
+    <select id="type">
+      <option value="income">Ganho</option>
+      <option value="expense">Gasto</option>
+    </select>
+    <select id="category"></select>
+    <button class="primary" onclick="addTransaction()">Adicionar</button>
+  </div>
+
+  <div class="card">
+    <h3>Categorias</h3>
+    <input id="newCategory" placeholder="Nova categoria">
+    <button onclick="addCategory()">Adicionar categoria</button>
+  </div>
+
+  <div class="card">
+    <h3>Histórico</h3>
+    <div id="transactions"></div>
+  </div>
+
+</div>
+
+<!-- HÁBITOS -->
+<div id="habits" class="section">
+
+  <div class="card">
+    <h3>Novo hábito</h3>
+    <input id="newHabit" placeholder="Ex: Treinar">
+    <button class="primary" onclick="addHabit()">Adicionar hábito</button>
+  </div>
+
+  <div class="card">
+    <h3>Hábitos</h3>
+    <div id="habitList"></div>
+  </div>
+
+</div>
+
+<!-- METAS -->
+<div id="goals" class="section">
+
+  <div class="card">
+    <h3>Nova meta</h3>
+    <input id="newGoal" placeholder="Ex: Economizar R$ 5.000">
+    <button class="primary" onclick="addGoal()">Adicionar meta</button>
+  </div>
+
+  <div class="card">
+    <h3>Metas</h3>
+    <div id="goalList"></div>
+  </div>
+
+</div>
+
+<script>
+const state={
+  categories:['Salário','Renda extra','Lazer'],
+  transactions:[],
+  habits:[],
+  goals:[]
+}
+
+function switchTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  event.target.classList.add('active')
+}
+
+function renderCategories(){
+  const sel=document.getElementById('category')
+  sel.innerHTML=''
+  state.categories.forEach(c=>{
+    const o=document.createElement('option')
+    o.textContent=c
+    sel.appendChild(o)
+  })
+}
+
+function addCategory(){
+  const val=document.getElementById('newCategory').value
+  if(!val) return
+  state.categories.push(val)
+  document.getElementById('newCategory').value=''
+  renderCategories()
+}
+
+function addTransaction(){
+  const v=Number(amount.value)
+  if(!v) return
+  state.transactions.push({
+    value:v,
+    type:type.value,
+    category:category.value
+  })
+  amount.value=''
+  renderFinance()
+}
+
+function renderFinance(){
+  const list=document.getElementById('transactions')
+  list.innerHTML=''
+  let balance=0
+
+  state.transactions.forEach(t=>{
+    balance+=t.type==='income'?t.value:-t.value
+    const div=document.createElement('div')
+    div.className=`list-item ${t.type}`
+    div.textContent=`R$ ${t.value.toFixed(2)} — ${t.category}`
+    list.appendChild(div)
+  })
+
+  document.getElementById('balance').textContent=`R$ ${balance.toFixed(2)}`
+}
+
+function addHabit(){
+  const v=newHabit.value
+  if(!v) return
+  state.habits.push({name:v,done:false})
+  newHabit.value=''
+  renderHabits()
+}
+
+function renderHabits(){
+  habitList.innerHTML=''
+  state.habits.forEach((h,i)=>{
+    const label=document.createElement('label')
+    const cb=document.createElement('input')
+    cb.type='checkbox'
+    cb.checked=h.done
+    cb.onchange=()=>{h.done=!h.done}
+    label.appendChild(cb)
+    label.appendChild(document.createTextNode(h.name))
+    habitList.appendChild(label)
+  })
+}
+
+function addGoal(){
+  const v=newGoal.value
+  if(!v) return
+  state.goals.push(v)
+  newGoal.value=''
+  renderGoals()
+}
+
+function renderGoals(){
+  goalList.innerHTML=''
+  state.goals.forEach(g=>{
+    const p=document.createElement('p')
+    p.textContent='• '+g
+    goalList.appendChild(p)
+  })
+}
+
+renderCategories()
+</script>
+
+</body>
+</html>
