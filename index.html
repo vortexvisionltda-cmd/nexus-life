@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gestão Pessoal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 24px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    .income { color: #22c55e; }
+    .expense { color: #ef4444; }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Gestão Pessoal</h1>
+
+  <div class="card">
+    <h2>Saldo atual</h2>
+    <h2 id="balance">R$ 0,00</h2>
+  </div>
+
+  <div class="card">
+    <h3>Novo lançamento</h3>
+
+    <input id="value" type="number" placeholder="Valor" />
+
+    <div class="row">
+      <select id="type">
+        <option value="expense">Gasto</option>
+        <option value="income">Ganho</option>
+      </select>
+
+      <input id="category" placeholder="Categoria" />
+    </div>
+
+    <button onclick="addTransaction()">Adicionar</button>
+  </div>
+
+  <div class="card">
+    <h3>Histórico</h3>
+    <div id="transactions"></div>
+  </div>
+
+  <div class="card">
+    <h3>Hábitos de hoje</h3>
+
+    <label>
+      <input type="checkbox" onchange="toggleHabit(0)" /> Treinar
+    </label>
+
+    <label>
+      <input type="checkbox" onchange="toggleHabit(1)" /> Não gastar fora
+    </label>
+
+    <label>
+      <input type="checkbox" onchange="toggleHabit(2)" /> Beber água
+    </label>
+  </div>
+
+  <script>
+    let transactions = []
+    let habits = [false, false, false]
+
+    function addTransaction() {
+      const value = Number(document.getElementById('value').value)
+      const type = document.getElementById('type').value
+      const category = document.getElementById('category').value || 'Geral'
+
+      if (!value) return
+
+      transactions.push({ value, type, category })
+      document.getElementById('value').value = ''
+      document.getElementById('category').value = ''
+
+      render()
+    }
+
+    function toggleHabit(index) {
+      habits[index] = !habits[index]
+    }
+
+    function render() {
+      const list = document.getElementById('transactions')
+      list.innerHTML = ''
+
+      let balance = 0
+
+      transactions.forEach(t => {
+        balance += t.type === 'income' ? t.value : -t.value
+
+        const div = document.createElement('div')
+        div.className = t.type
+        div.innerText = `${t.type === 'income' ? '🟢' : '🔴'} R$ ${t.value.toFixed(2)} — ${t.category}`
+
+        list.appendChild(div)
+      })
+
+      document.getElementById('balance').innerText =
+        `R$ ${balance.toFixed(2)}`
+    }
+  </script>
+
+</body>
+</html>
