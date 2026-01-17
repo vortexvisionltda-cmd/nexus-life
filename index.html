@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Gestão Pessoal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background:#0f172a;
+  color:#e5e7eb;
+  margin:0;
+  padding:16px;
+}
+
+h1,h2,h3{margin:0 0 8px}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+}
+
+.tabs button{
+  flex:1;
+  padding:10px;
+  background:#020617;
+  color:#94a3b8;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.tabs button.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+.section{display:none}
+.section.active{display:block}
+
+.card{
+  background:#020617;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:16px;
+}
+
+input,select,button{
+  width:100%;
+  padding:8px;
+  margin-bottom:8px;
+  border-radius:6px;
+  border:none;
+}
+
+button{
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+}
+
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+.income{color:#22c55e}
+.expense{color:#ef4444}
+</style>
+</head>
+
+<body>
+
+<h1>Gestão Pessoal</h1>
+
+<div class="tabs">
+  <button onclick="openTab('financeiro')" class="active">Financeiro</button>
+  <button onclick="openTab('habitos')">Hábitos</button>
+  <button onclick="openTab('metas')">Metas</button>
+</div>
+
+<!-- FINANCEIRO -->
+<div id="financeiro" class="section active">
+  <div class="card">
+    <h2>Saldo</h2>
+    <h2 id="balance">R$ 0,00</h2>
+  </div>
+
+  <div class="card">
+    <h3>Novo lançamento</h3>
+    <input id="value" type="number" placeholder="Valor">
+
+    <div class="row">
+      <select id="type">
+        <option value="income">Ganho</option>
+        <option value="expense">Gasto</option>
+      </select>
+
+      <select id="category">
+        <option>Salário</option>
+        <option>Renda extra</option>
+        <option>Conta fixa</option>
+        <option>Lazer</option>
+        <option>Alimentação</option>
+        <option>Outros</option>
+      </select>
+    </div>
+
+    <button onclick="addTransaction()">Adicionar</button>
+  </div>
+
+  <div class="card">
+    <h3>Histórico</h3>
+    <div id="transactions"></div>
+  </div>
+</div>
+
+<!-- HÁBITOS -->
+<div id="habitos" class="section">
+  <div class="card">
+    <h3>Hábitos de hoje</h3>
+    <label><input type="checkbox" onchange="toggleHabit(0)"> Treinar</label>
+    <label><input type="checkbox" onchange="toggleHabit(1)"> Beber água</label>
+    <label><input type="checkbox" onchange="toggleHabit(2)"> Não gastar fora</label>
+  </div>
+</div>
+
+<!-- METAS -->
+<div id="metas" class="section">
+  <div class="card">
+    <h3>Metas</h3>
+    <p>💰 Economizar R$ 5.000</p>
+    <p>🏋️ Treinar 5x por semana</p>
+    <p>📚 Ler 12 livros</p>
+  </div>
+</div>
+
+<script>
+let transactions = []
+let habits = [false,false,false]
+
+function openTab(tab){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'))
+
+  document.getElementById(tab).classList.add('active')
+  event.target.classList.add('active')
+}
+
+function addTransaction(){
+  const value = Number(document.getElementById('value').value)
+  const type = document.getElementById('type').value
+  const category = document.getElementById('category').value
+
+  if(!value) return
+
+  transactions.push({value,type,category})
+  document.getElementById('value').value=''
+
+  render()
+}
+
+function toggleHabit(i){
+  habits[i]=!habits[i]
+}
+
+function render(){
+  const list=document.getElementById('transactions')
+  list.innerHTML=''
+  let balance=0
+
+  transactions.forEach(t=>{
+    balance+=t.type==='income'?t.value:-t.value
+    const div=document.createElement('div')
+    div.className=t.type
+    div.textContent=`${t.type==='income'?'🟢':'🔴'} R$ ${t.value.toFixed(2)} — ${t.category}`
+    list.appendChild(div)
+  })
+
+  document.getElementById('balance').textContent=`R$ ${balance.toFixed(2)}`
+}
+</script>
+
+</body>
+</html>
